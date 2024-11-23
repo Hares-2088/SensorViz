@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Live Data</h1>
+<canvas id="liveTempChart" width="400" height="200"></canvas>
+<canvas id="liveHumChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const liveTempCtx = document.getElementById('liveTempChart').getContext('2d');
+    const liveHumCtx = document.getElementById('liveHumChart').getContext('2d');
+
+    const liveTempChart = new Chart(liveTempCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Live Temperature (°C)',
+                data: [],
+                borderColor: 'red',
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Timestamp' } },
+                y: { title: { display: true, text: 'Temperature (°C)' } }
+            }
+        }
+    });
+
+    const liveHumChart = new Chart(liveHumCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Live Humidity (%)',
+                data: [],
+                borderColor: 'blue',
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Timestamp' } },
+                y: { title: { display: true, text: 'Humidity (%)' } }
+            }
+        }
+    });
+
+    function updateCharts() {
+        fetch('/live-data')
+            .then(response => response.json())
+            .then(data => {
+                const timestamp = new Date().toLocaleTimeString();
+                
+                // Update Temperature Chart
+                liveTempChart.data.labels.push(timestamp);
+                liveTempChart.data.datasets[0].data.push(
+                    data.temperature[data.temperature.length - 1] || 0
+                );
+                liveTempChart.update();
+
+                // Update Humidity Chart
+                liveHumChart.data.labels.push(timestamp);
+                liveHumChart.data.datasets[0].data.push(
+                    data.humidity[data.humidity.length - 1] || 0
+                );
+                liveHumChart.update();
+            });
+    }
+
+    setInterval(updateCharts, 5000); // Update every 5 seconds
+</script>
+{% endblock %}

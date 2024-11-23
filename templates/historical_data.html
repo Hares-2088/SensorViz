@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Historical Data from MQTT</h1>
+<canvas id="tempChart" width="400" height="200"></canvas>
+<canvas id="humChart" width="400" height="200"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const tempCtx = document.getElementById('tempChart').getContext('2d');
+    const humCtx = document.getElementById('humChart').getContext('2d');
+
+    const tempChart = new Chart(tempCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: [],
+                borderColor: 'red',
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Timestamp' } },
+                y: { title: { display: true, text: 'Temperature (°C)' } }
+            }
+        }
+    });
+
+    const humChart = new Chart(humCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Humidity (%)',
+                data: [],
+                borderColor: 'blue',
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { title: { display: true, text: 'Timestamp' } },
+                y: { title: { display: true, text: 'Humidity (%)' } }
+            }
+        }
+    });
+
+    // Fetch historical data from the backend
+    fetch('/historical-data')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(point => {
+                tempChart.data.labels.push(point.timestamp);
+                tempChart.data.datasets[0].data.push(point.value); // Assuming the value is temperature
+                humChart.data.labels.push(point.timestamp);
+                humChart.data.datasets[0].data.push(point.value); // Assuming the value is humidity
+            });
+            tempChart.update();
+            humChart.update();
+        });
+</script>
+{% endblock %}
