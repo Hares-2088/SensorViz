@@ -1,76 +1,103 @@
 {% extends "base.html" %}
+
+{% block title %}Live Data - IoT Dashboard{% endblock %}
+
 {% block content %}
-<h1>Live Data</h1>
-<canvas id="liveTempChart" width="400" height="200"></canvas>
-<canvas id="liveHumChart" width="400" height="200"></canvas>
+<h1 class="text-center mb-4">Live Temperature & Humidity Data</h1>
+<div class="row">
+    <div class="col-md-6">
+        <h5 class="text-center">Temperature (°C)</h5>
+        <canvas id="tempChart" width="400" height="200"></canvas>
+    </div>
+    <div class="col-md-6">
+        <h5 class="text-center">Humidity (%)</h5>
+        <canvas id="humChart" width="400" height="200"></canvas>
+    </div>
+</div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    const liveTempCtx = document.getElementById('liveTempChart').getContext('2d');
-    const liveHumCtx = document.getElementById('liveHumChart').getContext('2d');
-
-    const liveTempChart = new Chart(liveTempCtx, {
+    // Initialize Temperature Chart
+    const tempCtx = document.getElementById('tempChart').getContext('2d');
+    const tempChart = new Chart(tempCtx, {
         type: 'line',
         data: {
-            labels: [],
+            labels: [], // Time labels
             datasets: [{
-                label: 'Live Temperature (°C)',
-                data: [],
-                borderColor: 'red',
-                fill: false,
+                label: 'Temperature (°C)',
+                data: [], // Temperature data
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: false
             }]
         },
         options: {
             responsive: true,
             scales: {
-                x: { title: { display: true, text: 'Timestamp' } },
-                y: { title: { display: true, text: 'Temperature (°C)' } }
+                x: { title: { display: true, text: 'Time' } },
+                y: { title: { display: true, text: 'Temperature (°C)' }, beginAtZero: true }
             }
         }
     });
 
-    const liveHumChart = new Chart(liveHumCtx, {
+    // Initialize Humidity Chart
+    const humCtx = document.getElementById('humChart').getContext('2d');
+    const humChart = new Chart(humCtx, {
         type: 'line',
         data: {
-            labels: [],
+            labels: [], // Time labels
             datasets: [{
-                label: 'Live Humidity (%)',
-                data: [],
-                borderColor: 'blue',
-                fill: false,
+                label: 'Humidity (%)',
+                data: [], // Humidity data
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2,
+                fill: false
             }]
         },
         options: {
             responsive: true,
             scales: {
-                x: { title: { display: true, text: 'Timestamp' } },
-                y: { title: { display: true, text: 'Humidity (%)' } }
+                x: { title: { display: true, text: 'Time' } },
+                y: { title: { display: true, text: 'Humidity (%)' }, beginAtZero: true }
             }
         }
     });
 
     function updateCharts() {
-        fetch('/live-data')
-            .then(response => response.json())
+        fetch('/sensor-data')
+            .then(response => {
+                console.log('Fetch response status:', response.status); // Debug response status
+                return response.json();
+            })
             .then(data => {
-                const timestamp = new Date().toLocaleTimeString();
-                
+                console.log('Fetched data:', data); // Debug fetched data
+
+                const currentTime = new Date().toLocaleTimeString();
+
+                // Get the latest temperature and humidity
+                const latestTemperature = data.temperature[data.temperature.length - 1] || 0;
+                const latestHumidity = data.humidity[data.humidity.length - 1] || 0;
+
+                console.log('Latest Temperature:', latestTemperature);
+                console.log('Latest Humidity:', latestHumidity);
+
                 // Update Temperature Chart
-                liveTempChart.data.labels.push(timestamp);
-                liveTempChart.data.datasets[0].data.push(
-                    data.temperature[data.temperature.length - 1] || 0
-                );
-                liveTempChart.update();
+                tempChart.data.labels.push(currentTime);
+                tempChart.data.datasets[0].data.push(latestTemperature);
+                tempChart.update();
 
                 // Update Humidity Chart
-                liveHumChart.data.labels.push(timestamp);
-                liveHumChart.data.datasets[0].data.push(
-                    data.humidity[data.humidity.length - 1] || 0
-                );
-                liveHumChart.update();
+                humChart.data.labels.push(currentTime);
+                humChart.data.datasets[0].data.push(latestHumidity);
+                humChart.update();
+            })
+            .catch(error => {
+                console.error('Error fetching sensor data:', error); // Debug fetch errors
             });
     }
 
-    setInterval(updateCharts, 5000); // Update every 5 seconds
+
+
+    // Update charts every 5 seconds
+    setInterval(updateCharts, 5000);
 </script>
 {% endblock %}
