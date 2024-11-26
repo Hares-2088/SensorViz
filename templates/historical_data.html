@@ -1,134 +1,78 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IoT Dashboard - Historical Data</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="/">IoT Dashboard</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/live-data">Live Data</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/historical">Historical Data</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
 
-    <!-- Main Content -->
-    <div class="container mt-5">
-        <div class="text-center">
-            <h1 class="display-4">Historical Data</h1>
-            <p class="lead">Explore the historical temperature and humidity data collected by your IoT devices.</p>
-        </div>
+{% block title %}Historical Data - IoT Dashboard{% endblock %}
 
-        <div class="row text-center mt-4">
-            <div class="col-md-6">
-                <h3>Temperature (°C)</h3>
-                <canvas id="tempChart" width="400" height="200"></canvas>
-            </div>
-            <div class="col-md-6">
-                <h3>Humidity (%)</h3>
-                <canvas id="humChart" width="400" height="200"></canvas>
-            </div>
-        </div>
+{% block content %}
+<h1 class="text-center mb-4">Historical Temperature & Humidity Data</h1>
+<div class="row">
+    <div class="col-md-6">
+        <h5 class="text-center">Temperature (°C)</h5>
+        <canvas id="historicalTempChart" width="400" height="200"></canvas>
     </div>
+    <div class="col-md-6">
+        <h5 class="text-center">Humidity (%)</h5>
+        <canvas id="historicalHumChart" width="400" height="200"></canvas>
+    </div>
+</div>
 
-    <footer class="bg-dark text-center text-white mt-5 py-3">
-        <p class="mb-0">IoT Dashboard &copy; 2024</p>
-    </footer>
+<script>
+    var tempCtx = document.getElementById('historicalTempChart').getContext('2d');
+    var humCtx = document.getElementById('historicalHumChart').getContext('2d');
 
-    <script>
-        // Initialize Chart.js for Temperature and Humidity
-        var tempCtx = document.getElementById('tempChart').getContext('2d');
-        var humCtx = document.getElementById('humChart').getContext('2d');
-
-        var tempChart = new Chart(tempCtx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Temperature (°C)',
-                    data: [],
-                    borderColor: 'rgba(255, 99, 132, 1)',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Timestamp' }
-                    },
-                    y: {
-                        title: { display: true, text: 'Temperature (°C)' },
-                        beginAtZero: true
-                    }
-                }
+    var historicalTempChart = new Chart(tempCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Temperature (°C)',
+                data: [],
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
             }
-        });
+        }
+    });
 
-        var humChart = new Chart(humCtx, {
-            type: 'line',
-            data: {
-                labels: [],
-                datasets: [{
-                    label: 'Humidity (%)',
-                    data: [],
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 2,
-                    fill: false
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Timestamp' }
-                    },
-                    y: {
-                        title: { display: true, text: 'Humidity (%)' },
-                        beginAtZero: true
-                    }
-                }
+    var historicalHumChart = new Chart(humCtx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Humidity (%)',
+                data: [],
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            scales: {
+                y: { beginAtZero: true }
             }
-        });
+        }
+    });
 
-        // Fetch Historical Data from Flask Route
-        fetch('/historical-data')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(point => {
-                    tempChart.data.labels.push(point.timestamp);
-                    tempChart.data.datasets[0].data.push(point.value); // Assuming 'value' is temperature
-                });
+    // Fetch historical data and populate charts
+    fetch('/historical-data')
+        .then(response => response.json())
+        .then(data => {
+            data.forEach(point => {
+                // Add data to Temperature Chart
+                historicalTempChart.data.labels.push(point.timestamp);
+                historicalTempChart.data.datasets[0].data.push(point.temperature);
 
-                data.forEach(point => {
-                    humChart.data.labels.push(point.timestamp);
-                    humChart.data.datasets[0].data.push(point.value); // Assuming 'value' is humidity
-                });
-
-                tempChart.update();
-                humChart.update();
+                // Add data to Humidity Chart
+                historicalHumChart.data.labels.push(point.timestamp);
+                historicalHumChart.data.datasets[0].data.push(point.humidity);
             });
-    </script>
-</body>
-</html>
+
+            // Update charts
+            historicalTempChart.update();
+            historicalHumChart.update();
+        })
+        .catch(error => console.error('Error fetching historical data:', error));
+</script>
+{% endblock %}
