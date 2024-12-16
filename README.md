@@ -10,6 +10,13 @@ Welcome to the **IoT Dashboard** project! This application provides real-time an
 - 🚨 **Motion Sensor Alerts**: Receive alerts when motion is detected in the house.
 - 💡 **LED Control**: Control LEDs from the web application to indicate motion detection or manually turn them on/off.
 
+## 🎥 Demo
+
+Check out the demo of the IoT Dashboard in action:
+
+[![IoT Dashboard Demo](https://img.youtube.com/vi/pNull4OindU/0.jpg)](https://youtu.be/pNull4OindU)
+
+
 ---
 
 ## 🛠️ Requirements
