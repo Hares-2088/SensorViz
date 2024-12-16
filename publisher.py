@@ -5,7 +5,7 @@ import time
 import json
 
 # DHT sensor setup
-DHT_SENSOR = adafruit_dht.DHT11(board.D4)  # Use GPIO4 (BCM)
+DHT_SENSOR = adafruit_dht.DHT11(board.D4)  
 
 # MQTT setup
 MQTT_BROKER = "localhost"

@@ -110,7 +110,7 @@ def historical_page():
     return render_template("historical_data.html")
 
 # GPIO setup
-motionSensorPin = 4  # Update with your actual GPIO pin
+motionSensorPin = 27  # Update with your actual GPIO pin
 ledPin = 17  # Update with your actual GPIO pin
 
 GPIO.setmode(GPIO.BCM)
