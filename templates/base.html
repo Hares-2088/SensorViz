@@ -52,7 +52,12 @@
         function handleMotionDetection() {
             const socket = new WebSocket('ws://your-websocket-url');
 
+            socket.onopen = function() {
+                console.log('WebSocket connection established');
+            };
+
             socket.onmessage = function(event) {
+                console.log('WebSocket message received:', event.data);
                 const data = JSON.parse(event.data);
                 if (data.motionDetected) {
                     Swal.fire({
@@ -66,6 +71,10 @@
 
             socket.onerror = function(error) {
                 console.error('WebSocket Error: ', error);
+            };
+
+            socket.onclose = function() {
+                console.log('WebSocket connection closed');
             };
         }
 
