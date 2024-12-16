@@ -7,6 +7,8 @@ Welcome to the **IoT Dashboard** project! This application provides real-time an
 - 🕰️ **Historical Data**: Persistent storage of sensor readings for future analysis.
 - 🔗 **Interactive Web Interface**: Beautiful, responsive UI powered by Flask and Chart.js.
 - 📡 **MQTT Integration**: Seamless communication between the Raspberry Pi and the web application.
+- 🚨 **Motion Sensor Alerts**: Receive alerts when motion is detected in the house.
+- 💡 **LED Control**: Control LEDs from the web application to indicate motion detection or manually turn them on/off.
 
 ---
 
@@ -15,6 +17,8 @@ Before you begin, ensure you have the following:
 - 🥧 Raspberry Pi with Python3 installed
 - 📡 MQTT Broker (e.g., Mosquitto)
 - 🌡️ DHT11 or DHT22 sensor
+- 🚨 Motion sensor (e.g., PIR sensor)
+- 💡 LEDs and appropriate resistors
 - 📋 Installed Python libraries:
   - Flask
   - paho-mqtt
@@ -79,6 +83,18 @@ Replace <your_raspberry_pi_ip> with the actual IP of your Raspberry Pi.
   http://<your_raspberry_pi_ip>:5000/historical
 - View historical temperature and humidity data stored in the `data/historical_data.txt` file. 🕰️
 - Charts will display data points based on timestamps for easy analysis.
+
+### Motion Sensor Alerts
+- Receive alerts on the web interface when motion is detected in the house.
+- The motion sensor can trigger an LED to blink, indicating that someone has entered the house and needs to turn off the security system.
+
+### LED Control
+- Control LEDs from the web application to indicate motion detection or manually turn them on/off.
+- Navigate to the **LED Control** page by clicking the link in the navigation bar or visiting:
+
+  ```bash
+  http://<your_raspberry_pi_ip>:5000/led-control
+- Use the interface to turn LEDs on or off as needed.
 
 ---
 
