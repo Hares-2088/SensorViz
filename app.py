@@ -1,11 +1,13 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import threading
 import paho.mqtt.client as mqtt
 import os
 import json
 from collections import deque
 from datetime import datetime
-
+import RPi.GPIO as GPIO
+from gpiozero import MotionSensor
+import time
 
 app = Flask(__name__)
 
@@ -106,7 +108,44 @@ def historical_data():
 def historical_page():
     return render_template("historical_data.html")
 
+# GPIO setup
+motionSensorPin = 4  # Update with your actual GPIO pin
+ledPin = 17  # Update with your actual GPIO pin
 
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(ledPin, GPIO.OUT)
+
+pir = MotionSensor(motionSensorPin)
+
+def motionLoop():
+    while True:
+        if pir.wait_for_active():
+            print('Motion detected')
+            GPIO.output(ledPin, GPIO.HIGH)
+            time.sleep(0.5)
+            GPIO.output(ledPin, GPIO.LOW)
+            time.sleep(0.5)
+        time.sleep(0.1)
+
+# Start the motion detection loop in a separate thread
+motion_thread = threading.Thread(target=motionLoop)
+motion_thread.daemon = True
+motion_thread.start()
+
+@app.route('/led-control', methods=['GET'])
+def led_control():
+    action = request.args.get('action')
+    if action == 'on':
+        GPIO.output(ledPin, GPIO.HIGH)
+        return jsonify(success=True)
+    elif action == 'off':
+        GPIO.output(ledPin, GPIO.LOW)
+        return jsonify(success=True)
+    else:
+        return jsonify(success=False)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    try:
+        app.run(host="0.0.0.0", port=5000, debug=True)
+    except KeyboardInterrupt:
+        GPIO.cleanup()
