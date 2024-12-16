@@ -6,8 +6,9 @@ import json
 from collections import deque
 from datetime import datetime
 import RPi.GPIO as GPIO
-from gpiozero import MotionSensor
+from gpiozero import MotionSensor, exc  # Import exc for GPIOPinInUse exception
 import time
+import lgpio  # Import lgpio module
 
 app = Flask(__name__)
 
@@ -113,9 +114,24 @@ motionSensorPin = 4  # Update with your actual GPIO pin
 ledPin = 17  # Update with your actual GPIO pin
 
 GPIO.setmode(GPIO.BCM)
-GPIO.setup(ledPin, GPIO.OUT)
 
-pir = MotionSensor(motionSensorPin)
+# Disable GPIO warnings
+GPIO.setwarnings(False)
+
+try:
+    GPIO.setup(ledPin, GPIO.OUT)
+except RuntimeWarning:
+    print("Warning: This channel is already in use.")
+
+try:
+    pir = MotionSensor(motionSensorPin)
+except exc.GPIOPinInUse as e:
+    print("Error: GPIO pin is busy.")
+except lgpio.error as e:
+    if 'GPIO busy' in str(e):
+        print("Error: GPIO pin is busy.")
+    else:
+        raise
 
 def motionLoop():
     while True:

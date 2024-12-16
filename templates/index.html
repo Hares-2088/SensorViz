@@ -85,6 +85,13 @@
             <button class="btn btn-success btn-lg me-2" onclick="controlLED('on')">Turn LED On</button>
             <button class="btn btn-danger btn-lg" onclick="controlLED('off')">Turn LED Off</button>
         </div>
+
+        <div class="text-center mt-4">
+            <h3>Movement Alerts</h3>
+            <div id="movementAlert" class="alert alert-warning" role="alert" style="display: none;">
+                Movement detected in the room!
+            </div>
+        </div>
     </div>
 
     <footer class="footer bg-dark text-center text-white py-3">
@@ -164,6 +171,13 @@
                         data.humidity[data.humidity.length - 1] || 0
                     );
                     humChart.update();
+
+                    // Update movement alert
+                    if (data.movement) {
+                        document.getElementById('movementAlert').style.display = 'block';
+                    } else {
+                        document.getElementById('movementAlert').style.display = 'none';
+                    }
                 });
         }
 
